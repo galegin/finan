@@ -1,0 +1,90 @@
+02 almoço 43,3
+'' espetinho 32
+03 almoço 32,9
+'' álcool 79
+04 almoço 28,28
+'' notebook 800
+'' janta 46
+05 teclado 100
+'' mercado 104
+'' almoço 37,50
+'' venda subwolfer 70 $
+'' Fabiana 50 $
+'' tomada 10
+'' janta 32
+06 magazine Luiza 917,9
+'' almoço 39,25
+'' padaria 19,5
+'' venda CPU 300 $
+07 despesas 500 $
+'' recarga Fabiana 20
+'' recarga Taliane 20
+'' café 31
+'' jogo panela 160
+'' bombom 33,5
+'' batedeira 313,4
+'' Grill 108,49
+'' nubank Miguel 226,24
+'' nubank Fabiana 46,04
+'' mouse 37,42
+09 consórcio 255,67
+'' almoço 47,2
+'' uniforme 187,7
+'' café 13,5
+'' pastel 24
+'' corrediça 76
+10 almoço 44,25
+12 mercado 165,23 Cooper
+'' cartório 11
+'' janta 35,9
+'' sorvete 8
+'' devolução Honda 226,27 $
+13 comida box 19,99
+14 recarga Taliane Tim 10
+'' recarga Miguel Tim 10
+'' café 35,5
+'' Cooktop 549
+'' sapato 189 4x
+'' bombom 46,7
+'' mercado 43 cooper
+'' álcool 92
+'' janta 37,8
+'' farmácia 39,11
+15 restante CPU 50 $
+'' impressora 50 $
+'' outros 200
+'' pizza 40
+16 gasolina 40
+18 pizza 59,95
+19 mercado 164,34
+20 comida 19,99
+'' balcão 900
+21 café 34
+'' bombom 36,2
+'' bolo 10 deve
+'' churrasco 70
+22 sorvete 14,7
+23 marmita 18,96
+24 marmita 15,96
+25 marmita 18,36
+'' pedra balcao 750
+'' saque 150 $
+'' janta 53,5
+26 mercado 
+'' pintura 50
+'' mercado 456,5 chq 7/4
+'' janta 34
+27 marmita 19,99
+28 tinta 39,6
+'' café 34,5
+'' bombom 27
+'' álcool 99,13
+'' cabelo 13
+'' cone doce 11
+'' janta 46
+'' farmácia 23,18
+29 nubank Miguel 404,96
+'' nubank Fabiana 561,34
+'' total nubank 966,3 total
+31 almoço 19,36
+'' gasolina 36
