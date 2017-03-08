@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, StdCtrls, StrUtils, Math, uFinMovto, mBase64, mString,
-  mMensagemLog;
+  mLogger;
 
 type
   TF_Movto = class(TForm)

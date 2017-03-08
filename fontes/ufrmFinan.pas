@@ -5,7 +5,7 @@ interface
 uses
   Windows, Messages, SysUtils, Variants, Classes, Graphics, Controls, Forms,
   Dialogs, ExtCtrls, StdCtrls, Grids, DBGrids, DB, DBClient, StrUtils, Clipbrd,
-  uFinConta, uFinFluxo, uFinMovto;
+  uFinConta, uFinFluxo, uFinMovto, ValEdit;
 
 type
   TF_Finan = class(TForm)
@@ -58,8 +58,8 @@ implementation
 {$R *.dfm}
 
 uses
-  mClientDataSet, mDataSet, mProperty, mObjeto, mClasse,
-  mArquivo, mPath, mJson, mString, mMeses, ufrmMovto;
+  mClientDataSet, mStringGrid, mDataSet, mProperty, mObjeto, mClasse,
+  mArquivo, mPath, mJson, mString, mMeses, ufrmMovto, mExpressao;
 
   function PegarContaPai(AConta : String) : String;
   var
@@ -82,7 +82,7 @@ uses
   begin
     pInPago := IfThen(pInPago <> '', pInPago, TmString.Replicate('N', 12));
     vDsMes := TmString.LeftStr(pCdCampo, 'Vl_');
-    vNrMes := TmMeses.Codigo(vDsMes);
+    vNrMes := MesToInt(vDsMes);
     Result := Copy(pInPago, vNrMes, 1) = 'S';
   end;
 
@@ -93,7 +93,7 @@ uses
   begin
     pInPago := IfThen(pInPago <> '', pInPago, TmString.Replicate('N', 12));
     vDsMes := TmString.LeftStr(pCdCampo, 'Vl_');
-    vNrMes := TmMeses.Codigo(vDsMes);
+    vNrMes := MesToInt(vDsMes);
     vInPago := Copy(pInPago, vNrMes, 1);
     vInPago := IfThen(vInPago = 'S', 'N', 'S');
     pInPago[vNrMes] := vInPago[1];
@@ -349,13 +349,13 @@ begin
 
     // Ctrl + C
     if ssCtrl in Shift then
-      if Chr(Key) in ['C', 'c'] then
-        Clipboard.AsText := TmDataSet.PegarS(tFluxo, FieldName);
-
-    // Ctrl + V
-    if ssCtrl in Shift then
-      if Chr(Key) in ['V', 'v'] then
-        TmDataSet.SetarS(tFluxo, FieldName, Clipboard.AsText);
+      case Chr(Key) of
+        'C', 'c':
+          Clipboard.AsText := TmDataSet.PegarS(tFluxo, FieldName);
+        'V', 'v':
+          TmDataSet.SetarS(tFluxo, FieldName, Clipboard.AsText);
+      end;
+      
   end;
 end;
 
@@ -402,10 +402,96 @@ procedure TF_Finan.tFluxoAfterPost(ADataset: TDataSet);
     end;
   end;
 
+  //--
+
+  function GetValuesConta(AConta : String) : TmPropertyList;
+  var
+    vCdConta : String;
+    vRecNo : Integer;
+  begin
+    Result := nil;
+
+    with tFluxo do begin
+      vRecNo := RecNo;
+
+      First;
+      while not EOF do begin
+        vCdConta := TmDataSet.PegarS(tFluxo, 'Cd_Conta');
+
+        if vCdConta = AConta then begin
+          Result := TmDataSet.GetValues(tFluxo);
+          Break;
+        end;
+
+        Next;
+      end;
+
+      if vRecNo > 0 then
+        RecNo := vRecNo;
+    end;
+  end;
+
+  function GetValuesFormula(AFormula : String) : TmPropertyList;
+  var
+    vFormula, vConta, vCampo : String;
+    vLstConta : TStringList;
+    vValues : TmPropertyList;
+    vValue : TmProperty;
+    sValor : String;
+    vValor : Real;
+    C, I : Integer;
+  begin
+    Result := TmPropertyList.Create;
+
+    //-- identifica conta
+
+    vFormula := AFormula;
+    vLstConta := TStringList.Create;
+    while Pos('{', vFormula) > 0 do begin
+      Delete(vFormula, 1, Pos('{', vFormula));
+      vConta := Copy(vFormula, 1, Pos('}', vFormula) - 1);
+      Delete(vFormula, 1, Pos('}', vFormula));
+
+      vValues := GetValuesConta(vConta);
+      if Assigned(vValues) then
+        vLstConta.AddObject(vConta, vValues);
+    end;
+
+    //-- efetua calculo
+
+    for C := 1 to 12 do begin
+      vCampo := 'Vl_' + IntToMes(C);
+
+      vFormula := AFormula;
+      for I := 0 to vLstConta.Count - 1 do begin
+        vValues := TmPropertyList(vLstConta.Objects[I]);
+        vValue := vValues.IndexOf(vCampo);
+        if Assigned(vValue) then
+          vValor := vValue.ValueFloat
+        else
+          vValor := 0;
+        vFormula := AnsiReplaceStr(vFormula, '{' + vLstConta[I] + '}', FloatToStr(vValor));
+      end;
+
+      vFormula := AnsiReplaceStr(vFormula, ',', '.');
+      sValor := TmExpressao.Calcular(vFormula, 2);
+      sValor := AnsiReplaceStr(sValor, '.', ',');
+      vValor := StrToFloatDef(sValor, 0);
+
+      with Result.Adicionar do begin
+        Nome := vCampo;
+        Tipo := tppFloat;
+        ValueFloat := vValor;
+      end;
+    end;
+
+  end;
+
 var
   vCdConta : String;
   vNotify : TmDataSet_Notify;
-  vObj_Fluxo_Total : TFin_Fluxo;
+  vObj_Fluxo_Total, vObj_Fluxo : TFin_Fluxo;
+  vValues : TmPropertyList;
   vRecNo : Integer;
 begin
   with tFluxo do begin
@@ -415,6 +501,8 @@ begin
 
     vNotify := TmDataSet.GetNotify(tFluxo);
     TmDataSet.ClearNotify(ADataSet);
+
+    //-- totaliza sintetica
 
     Last;
     while not BOF do begin
@@ -428,6 +516,29 @@ begin
 
       Prior;
     end;
+
+    //-- calcula formula
+
+    vObj_Fluxo := TFin_Fluxo.Create(nil);
+
+    First;
+    while not EOF do begin
+      vCdConta := Obj_Fluxo.Cd_Conta;
+
+      if Obj_Fluxo.Ds_Formula <> '' then begin
+        vValues := GetValuesFormula(Obj_Fluxo.Ds_Formula);
+        if Assigned(vValues) then begin
+          TmObjeto.SetValues(vObj_Fluxo, vValues);
+          Obj_Fluxo := Obj_Fluxo.Setar(vObj_Fluxo);
+        end;
+      end;
+
+      Next;
+    end;
+
+    FreeAndNil(vObj_Fluxo);
+
+    //--
 
     TmDataSet.SetNotify(tFluxo, vNotify);
 

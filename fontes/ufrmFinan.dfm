@@ -1,6 +1,6 @@
 object F_Finan: TF_Finan
-  Left = 92
-  Top = 165
+  Left = 142
+  Top = 147
   Width = 873
   Height = 542
   ActiveControl = gFluxo
@@ -20,7 +20,7 @@ object F_Finan: TF_Finan
   object _PanelFiltro: TPanel
     Left = 0
     Top = 0
-    Width = 865
+    Width = 857
     Height = 37
     Align = alTop
     BevelOuter = bvNone
@@ -78,8 +78,8 @@ object F_Finan: TF_Finan
   object gFluxo: TDBGrid
     Left = 0
     Top = 37
-    Width = 865
-    Height = 471
+    Width = 857
+    Height = 467
     Align = alClient
     BorderStyle = bsNone
     DataSource = dFluxo
